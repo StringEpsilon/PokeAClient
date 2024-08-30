@@ -15,10 +15,17 @@ export class PokeAClient {
 	private _callbacks: PokeAClientCallbacks = {}
 	private _options: ClientOptions;
 
+	/**
+	 * Creates an instance of PokeAClient.
+	 *
+	 * @constructor
+	 * @param {PokeAClientCallbacks} callbacks The event callbacks to invoke.
+	 * @param {Partial<ClientOptions>} [options={}] Additional client options. 
+	 */
 	constructor(callbacks: PokeAClientCallbacks, options: Partial<ClientOptions> = {}) {
 		this._options = {
 			pokeAByteUrl: options.pokeAByteUrl ?? "http://localhost:8085",
-			reconnectDelay: options.reconnectDelay ?? 2000,
+			reconnectDelayMs: options.reconnectDelayMs ?? 2000,
 		};
 
 		this._callbacks = callbacks;
@@ -26,7 +33,7 @@ export class PokeAClient {
 			.withUrl(this._options.pokeAByteUrl + "/updates")
 			.configureLogging(LogLevel.Critical)
 			.withAutomaticReconnect(
-				{ nextRetryDelayInMilliseconds: () => this._options.reconnectDelay }
+				{ nextRetryDelayInMilliseconds: () => this._options.reconnectDelayMs }
 			)
 			.build();
 
@@ -39,7 +46,7 @@ export class PokeAClient {
 			PokeAByteMessages.MapperLoaded, 
 			async () => {
 				console.log("[PokeAClient] " + PokeAByteMessages.MapperLoaded);
-				await this.refreshMapper()
+				await this._refreshMapper()
 			});
 		this._connection.on(
 			PokeAByteMessages.InstanceReset, 
@@ -74,7 +81,11 @@ export class PokeAClient {
 	}
 
 	private _onPropertiesChanged = (properties: GameProperty[]) => {
-		properties.forEach(x => this._onPropertyChanged(x));
+		properties.forEach(property => this._onPropertyChanged(property));
+		if (this._callbacks.onPropertiesChanged) {
+			const paths: string[] = properties.map(property => property.path);
+			this._callbacks.onPropertiesChanged(paths);
+		}
 	}
 
 	private _fetch = async (requestUrl: string, method: string, body: any) => {
@@ -86,30 +97,7 @@ export class PokeAClient {
 		}
 	}
 
-	connect = async () => {
-		try {
-			await this._connection.start();
-			await this.refreshMapper();
-			if (this._callbacks.onConnectionChange) {
-				this._callbacks.onConnectionChange(true);
-			}
-			if (this._callbacks.onConnect) {
-				this._callbacks.onConnect();
-			}
-		} catch {
-			setTimeout(() => this.connect(), this._options.reconnectDelay);
-		}
-	}
-
-	getProperty = (path: string) => this._properties[path];
-
-	getMapper = () => this._mapper;
-
-	getGlossary = () => this._glossary;
-
-	isConnected = () => this._connection.state === HubConnectionState.Connected;
-
-	refreshMapper = async () => {
+	private _refreshMapper = async () => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper";
 		return fetch(requestUrl)
 			.then(async (response) => {
@@ -134,27 +122,98 @@ export class PokeAClient {
 				}
 				return null;
 			});
-
 	}
 
+	/**
+	 * Connect to PokeAByte.
+	 */
+	connect = async () => {
+		try {
+			await this._connection.start();
+			await this._refreshMapper();
+			if (this._callbacks.onConnectionChange) {
+				this._callbacks.onConnectionChange(true);
+			}
+			if (this._callbacks.onConnect) {
+				this._callbacks.onConnect();
+			}
+		} catch {
+			setTimeout(() => this.connect(), this._options.reconnectDelayMs);
+		}
+	}
+
+	/**
+	 * Get target game property. Returns null if the property does not exist.
+	 * @param {string} path The path of the property to retrieve.
+	 * @returns {(GameProperty|undefined)}
+	 */
+	getProperty = (path: string): GameProperty|null => this._properties[path] ?? null;
+	
+	
+	/**
+	 * Get the current mapper metadata. Returns null if no mapper is loaded or if there is no connection to PokeAByte.
+	 * @returns {Mapper | null} 
+	 */
+	getMapper = ():Mapper | null => this._mapper;
+	
+	/**
+	 * Get the current mapper glossary. The glossary is an empty object if there is no connection to PokeAByte or if
+	 * no mapper is currently loaded. 
+	 * @returns {Record<string, any>} 
+	 */
+	getGlossary = ():Record<string, any> => this._glossary;
+
+	/**
+	 * Check whether the client is currently connected to PokeAByte
+	 * @returns {boolean} 
+	 */
+	isConnected = (): boolean => this._connection.state === HubConnectionState.Connected;
+
+	/** 
+	 * Request PokeAByte to load a specific mapper/driver combination. 
+	 * @param {string} id The GUID of the mapper to load. See also {@link Mapper.id}.
+	 * @param {Driver} driver Which driver to use for the mapper. 
+	 * @returns {boolean} Whether the request was succesful.
+	 */
 	changeMapper = async (id: string, driver: Driver) => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper";
 		const body = JSON.stringify({ id, driver });
 		return await this._fetch(requestUrl, "PUT", body);
 	}
 
+	/** 
+	 * Request PokeAByte to freeze or unfreeze the value of a specific property.
+	 * @param {string} path The path of the property to change.
+	 * @param {boolean} freeze Whether to freeze (`true`) or unfreeze (`false`) the property.
+	 * @returns {boolean} Whether the request was succesful.
+	 */
 	freezeProperty = async (path: string, freeze: boolean) => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper/set-property-frozen";
 		const body = JSON.stringify({ path, freeze });
 		return await this._fetch(requestUrl, "POST", body);
 	}
 
+	/** 
+	 * Request PokeAByte to change the value of a specific property.
+	 * @param {string} path The path of the property to change.
+	 * @param {*} value The value to set for the property.
+	 * @param {boolean?} freeze Optional: Whether to freeze (`true`) or unfreeze (`false`) the property. 
+	 * Leave undefined to not change the frozen status of the property.
+	 * @returns {boolean} Whether the request was succesful.
+	 */
 	updatePropertyValue = async (path: string, value: any, freeze?: boolean) => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper/set-property-value";
 		const body = JSON.stringify({ path, value, freeze });
 		return await this._fetch(requestUrl, "POST", body);
 	}
-
+	/** 
+	 * Request PokeAByte to change a property by setting the raw bytes.
+	 * @param {string} path The path of the property to change.
+	 * @param {number[]} bytes The byte array to set on the property.
+	 * @param {boolean?} freeze Optional: Whether to freeze (`true`) or unfreeze (`false`) the property. 
+	 * Leave undefined to not change the frozen status of the property.
+	 * @returns {boolean} Whether the request was succesful.
+	 */
 	updatePropertyBytes = async (path: string, bytes: number[], freeze?: boolean) => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper/set-property-bytes";
 		const body = JSON.stringify({ path, bytes, freeze });

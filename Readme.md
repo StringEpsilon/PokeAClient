@@ -9,9 +9,10 @@ license, since the default client PokeAByte provides falls under the AGPL which 
 import { PokeAClient } from "pokeaclient";
 
 var client = new PokeAClient({
-	onMapperChange:  handleMapperChange,
-	onPropertyChange:  handlePropertyChange,
-	onConnectionChange:  handleConnectionChange,
+	onMapperChange: handleMapperChange,
+	onConnectionChange: handleConnectionChange,
+	onPropertiesChanged: handlePropertiesChanged, // for multiple property updates at once.
+	onPropertyChange: handlePropertyChange, // handle individual updates.
 
 });
 client.connect();
