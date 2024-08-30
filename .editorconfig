@@ -1,0 +1,3 @@
+[*.ts]
+	indent_style = tab
+	quote_type = double # " is a lot easier to type :P
