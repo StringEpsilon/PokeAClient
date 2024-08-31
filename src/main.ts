@@ -147,7 +147,7 @@ export class PokeAClient {
 	 * @param {string} path The path of the property to retrieve.
 	 * @returns {(GameProperty|undefined)}
 	 */
-	getProperty = (path: string): GameProperty|null => this._properties[path] ?? null;
+	getProperty = <T=any>(path: string): GameProperty<T>|null => this._properties[path] ?? null;
 	
 	
 	/**
