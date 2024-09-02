@@ -4,7 +4,7 @@ import { PokeAByteMessages } from "./types/PokeAByteMessages";
 import { Driver } from "./types/Driver";
 import { Mapper } from "./types/Mapper";
 import { PokeAClientCallbacks } from "./types/PokeAClientCallbacks";
-import { ClientOptions } from "./types/ClientOptions";
+import { ClientOptions, ChangedField } from "./types/ClientOptions";
 import { FetchMapperResponse } from "./types/FetchMapperResponse";
 
 export class PokeAClient {
@@ -26,6 +26,7 @@ export class PokeAClient {
 		this._options = {
 			pokeAByteUrl: options.pokeAByteUrl ?? "http://localhost:8085",
 			reconnectDelayMs: options.reconnectDelayMs ?? 2000,
+			updateOn: [ChangedField.bytes, ChangedField.value]
 		};
 
 		this._callbacks = callbacks;
@@ -72,8 +73,14 @@ export class PokeAClient {
 	}
 
 	private _onPropertyChanged = (property: GameProperty) => {
-		if (property.fieldsChanged.includes("value")) {
-			this._properties[property.path] = property;
+		if (this._options.updateOn.some(x => property.fieldsChanged.includes(x))) {
+			this._properties[property.path] = {
+				...this._properties[property.path],
+				value: property.value,
+				bits: property.bits,
+				bytes: property.bytes,
+				isFrozen: property.isFrozen,
+			}
 			if (this._callbacks.onPropertyChange) {
 				this._callbacks.onPropertyChange(property.path);
 			}
@@ -90,7 +97,7 @@ export class PokeAClient {
 
 	private _fetch = async (requestUrl: string, method: string, body: any) => {
 		try {
-			var response = await fetch(requestUrl, { method, body });
+			var response = await fetch(requestUrl, { method, body, headers: { 'Content-Type': 'application/json' } });
 			return response.ok;
 		} catch {
 			return false
