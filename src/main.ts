@@ -227,3 +227,13 @@ export class PokeAClient {
 		return await this._fetch(requestUrl, "POST", body);
 	}
 }
+export type { 
+	GameProperty, 
+	PokeAByteMessages, 
+	Driver, 
+	Mapper, 
+	PokeAClientCallbacks, 
+	ClientOptions, 
+	ChangedField, 
+	FetchMapperResponse 
+};
