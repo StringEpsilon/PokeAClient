@@ -27,7 +27,7 @@ export class PokeAClient {
 		this._options = {
 			pokeAByteUrl: options.pokeAByteUrl ?? "http://localhost:8085",
 			reconnectDelayMs: options.reconnectDelayMs ?? 2000,
-			updateOn: [ChangedField.bytes, ChangedField.value]
+			updateOn: options.updateOn ?? [ChangedField.bytes, ChangedField.value],
 		};
 
 		this._callbacks = callbacks;
