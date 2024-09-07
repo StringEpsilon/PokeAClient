@@ -7,6 +7,7 @@ import { PokeAClientCallbacks } from "./types/PokeAClientCallbacks";
 import { ClientOptions, ChangedField } from "./types/ClientOptions";
 import { FetchMapperResponse } from "./types/FetchMapperResponse";
 
+
 export class PokeAClient {
 	private _mapper: Mapper | null = null;
 	private _properties: Record<string, GameProperty> = {};
@@ -227,6 +228,8 @@ export class PokeAClient {
 		return await this._fetch(requestUrl, "POST", body);
 	}
 }
+
+export { ChangedField } from  "./types/ClientOptions";
 export type { 
 	GameProperty, 
 	PokeAByteMessages, 
@@ -234,6 +237,5 @@ export type {
 	Mapper, 
 	PokeAClientCallbacks, 
 	ClientOptions, 
-	ChangedField, 
 	FetchMapperResponse 
 };
