@@ -193,7 +193,7 @@ export class PokeAClient {
 	 * @returns {AvailableMapper[]|null} The array of mappers, or null if the request failed for some reason.
 	 */
 	getMappers = async () => {
-		const requestUrl = this._options.pokeAByteUrl + "mapper-service/get-mappers";
+		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/get-mappers";
 		try {
 			var response = await fetch(requestUrl, { headers: { 'Content-Type': 'application/json' } });
 			

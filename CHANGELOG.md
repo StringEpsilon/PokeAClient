@@ -1,3 +1,6 @@
+# 0.2.1 (2024-09-07)
+- Fixed missing "/" in get-mappers URI.
+
 # 0.2.0 (2024-09-07)
 - Feature: If the "MapperLoaded" message has payload, the client uses that instead of making a fetch call.
 - Feature: Support the new /mapper-service/get-mappers endpoint.
