@@ -6,7 +6,7 @@ import { Mapper } from "./types/Mapper";
 import { PokeAClientCallbacks } from "./types/PokeAClientCallbacks";
 import { ClientOptions, ChangedField } from "./types/ClientOptions";
 import { FetchMapperResponse } from "./types/FetchMapperResponse";
-
+import { AvailableMapper } from "./types/AvailableMapper";
 
 export class PokeAClient {
 	private _mapper: Mapper | null = null;
@@ -46,9 +46,9 @@ export class PokeAClient {
 			});
 		this._connection.on(
 			PokeAByteMessages.MapperLoaded, 
-			async () => {
+			async (data: FetchMapperResponse|undefined) => {
 				console.log("[PokeAClient] " + PokeAByteMessages.MapperLoaded);
-				await this._refreshMapper()
+				await this._refreshMapper();
 			});
 		this._connection.on(
 			PokeAByteMessages.InstanceReset, 
@@ -58,7 +58,7 @@ export class PokeAClient {
 				this._properties = {};
 				this._glossary = {}
 				if (this._callbacks.onMapperChange ) {
-					this._callbacks.onMapperChange() ;
+					this._callbacks.onMapperChange();
 				}
 			});
 		this._connection.onclose(this._onClose);
@@ -111,7 +111,6 @@ export class PokeAClient {
 			.then(async (response) => {
 				if (response.ok) {
 					let data = await response.json() as FetchMapperResponse;
-
 					this._mapper = data?.meta ?? null;
 					this._glossary = data?.glossary ?? null;
 					this._properties = {};
@@ -177,6 +176,24 @@ export class PokeAClient {
 	 */
 	isConnected = (): boolean => this._connection.state === HubConnectionState.Connected;
 
+	/**
+	 * Request the list of available mappers from PokeAByte.
+	 * @returns {AvailableMapper[]|null} The array of mappers, or null if the request failed for some reason.
+	 */
+	getMappers = async () => {
+		const requestUrl = this._options.pokeAByteUrl + "mapper-service/get-mappers";
+		try {
+			var response = await fetch(requestUrl, { headers: { 'Content-Type': 'application/json' } });
+			
+			if (!response.ok) {
+				return null;
+			}
+			return (await response.json()) as AvailableMapper[]
+		} catch {
+			return null
+		}
+	}
+
 	/** 
 	 * Request PokeAByte to load a specific mapper/driver combination. 
 	 * @param {string} id The GUID of the mapper to load. See also {@link Mapper.id}.
@@ -237,5 +254,6 @@ export type {
 	Mapper, 
 	PokeAClientCallbacks, 
 	ClientOptions, 
-	FetchMapperResponse 
+	FetchMapperResponse,
+	AvailableMapper
 };
