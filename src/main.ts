@@ -48,7 +48,11 @@ export class PokeAClient {
 			PokeAByteMessages.MapperLoaded, 
 			async (data: FetchMapperResponse|undefined) => {
 				console.log("[PokeAClient] " + PokeAByteMessages.MapperLoaded);
-				await this._refreshMapper();
+				if (data) {
+					this._updateEverything(data?.meta, data?.glossary, data?.properties);
+				} else {
+					await this._refreshMapper();
+				}
 			});
 		this._connection.on(
 			PokeAByteMessages.InstanceReset, 
@@ -105,22 +109,30 @@ export class PokeAClient {
 		}
 	}
 
+	private _updateEverything(
+		meta: Mapper|undefined, 
+		glossary: Record<string, any>|undefined, 
+		properties: GameProperty[]|undefined
+	) {
+		this._mapper = meta ?? null;
+		this._glossary = glossary ?? {};
+		this._properties = {};
+		if (this._callbacks.onMapperChange) {
+			this._callbacks.onMapperChange();
+		}
+		if (properties) {
+			properties.forEach((x: GameProperty) => this._properties[x.path] = x);
+			properties.forEach(x => this._onPropertyChanged(x));
+		}
+	}
+
 	private _refreshMapper = async () => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper";
 		return fetch(requestUrl)
 			.then(async (response) => {
 				if (response.ok) {
 					let data = await response.json() as FetchMapperResponse;
-					this._mapper = data?.meta ?? null;
-					this._glossary = data?.glossary ?? null;
-					this._properties = {};
-					if (this._callbacks.onMapperChange) {
-						this._callbacks.onMapperChange();
-					}
-					if (data) {
-						data.properties.forEach((x: GameProperty) => this._properties[x.path] = x);
-						data.properties.forEach(x => this._onPropertyChanged(x));
-					}
+					this._updateEverything(data?.meta, data?.glossary, data?.properties);
 				};
 			})
 			.catch(() => {
