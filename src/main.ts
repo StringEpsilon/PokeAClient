@@ -8,6 +8,7 @@ import { ClientOptions, ChangedField } from "./types/ClientOptions";
 import { FetchMapperResponse } from "./types/FetchMapperResponse";
 import { AvailableMapper } from "./types/AvailableMapper";
 import { Glossary, GlossaryItem } from "./types/Glossary";
+import { fetchResult, fetchWithoutResult } from "./utils/fetchWrapper";
 
 export class PokeAClient {
 	private _mapper: Mapper | null = null;
@@ -101,28 +102,6 @@ export class PokeAClient {
 		}
 	}
 
-	private _fetch = async (requestUrl: string, method: string, body: any = null) => {
-		try {
-			var response = await fetch(requestUrl, { method, body, headers: { 'Content-Type': 'application/json' } });
-			return response.ok;
-		} catch {
-			return false
-		}
-	}
-
-	private _fetchResult = async <T>(requestUrl: string) => {
-		try {
-			var response = await fetch(requestUrl, { headers: { 'Content-Type': 'application/json' } });
-
-			if (!response.ok) {
-				return null;
-			}
-			return (await response.json()) as T
-		} catch {
-			return null
-		}
-	}
-
 	private _updateEverything(
 		meta: Mapper | undefined,
 		glossary: Glossary | undefined,
@@ -210,8 +189,7 @@ export class PokeAClient {
 	 */
 	freezeProperty = async (path: string, freeze: boolean): Promise<boolean> => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper/set-property-frozen";
-		const body = JSON.stringify({ path, freeze });
-		return await this._fetch(requestUrl, "POST", body);
+		return await fetchWithoutResult(requestUrl, "POST", { path, freeze });
 	}
 
 	/** 
@@ -224,8 +202,7 @@ export class PokeAClient {
 	 */
 	updatePropertyValue = async (path: string, value: any, freeze?: boolean): Promise<boolean> => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper/set-property-value";
-		const body = JSON.stringify({ path, value, freeze });
-		return await this._fetch(requestUrl, "POST", body);
+		return await fetchWithoutResult(requestUrl, "POST", { path, value, freeze });
 	}
 	/** 
 	 * Request PokeAByte to change a property by setting the raw bytes.
@@ -237,8 +214,7 @@ export class PokeAClient {
 	 */
 	updatePropertyBytes = async (path: string, bytes: number[], freeze?: boolean): Promise<boolean> => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper/set-property-bytes";
-		const body = JSON.stringify({ path, bytes, freeze });
-		return await this._fetch(requestUrl, "POST", body);
+		return await fetchWithoutResult(requestUrl, "POST", { path, bytes, freeze });
 	}
 
 	/**
@@ -247,22 +223,22 @@ export class PokeAClient {
 	 */
 	getMappers = async (): Promise<AvailableMapper[]|null> => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/get-mappers";
-		return await this._fetchResult<AvailableMapper[]>(requestUrl);
+		return await fetchResult<AvailableMapper[]>(requestUrl);
 	}
 
 	getIsMapperConnected = async () => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/is-connected";
-		return await this._fetchResult<boolean>(requestUrl);
+		return await fetchResult<boolean>(requestUrl);
 	}
 
 	setMapper = async (mapperId: string) => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/change-mapper";
-		return await this._fetch(requestUrl, "POST", JSON.stringify(mapperId));
+		return await fetchWithoutResult(requestUrl, "POST", JSON.stringify(mapperId));
 	}
 
 	unloadMapper = async () => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/unload-mapper";
-		return await this._fetch(requestUrl, "PUT");
+		return await fetchWithoutResult(requestUrl, "PUT");
 	}
 
 	/** 
@@ -275,7 +251,7 @@ export class PokeAClient {
 			return false;
 		}
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/change-mapper";
-		return await this._fetch(requestUrl, "PUT", mapperId);
+		return await fetchWithoutResult(requestUrl, "PUT", mapperId);
 	}
 
 	/** 
@@ -286,8 +262,7 @@ export class PokeAClient {
 	 */
 	writeMemory = async (address: number, bytes: number[]): Promise<void> => {
 		const requestUrl = this._options.pokeAByteUrl + "/driver/memory";
-		const body = JSON.stringify({ Address: address, Bytes: bytes })
-		await this._fetch(requestUrl, "PUT", body);
+		await fetchWithoutResult(requestUrl, "PUT", { Address: address, Bytes: bytes });
 	}
 }
 
