@@ -1,3 +1,7 @@
+# 0.3.0 (2024-09-07)
+- `changeMapper`  now calls `/mapper-service/change-mapper` and no longer needs the driver parameter.
+- Added better typing for the glossary.
+
 # 0.2.1 (2024-09-07)
 - Fixed missing "/" in get-mappers URI.
 
