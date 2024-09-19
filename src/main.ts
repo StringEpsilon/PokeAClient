@@ -257,7 +257,7 @@ export class PokeAClient {
 
 	setMapper = async (mapperId: string) => {
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/change-mapper";
-		return await this._fetch(requestUrl, "POST", { mapperId });
+		return await this._fetch(requestUrl, "POST", JSON.stringify(mapperId));
 	}
 
 	unloadMapper = async () => {
@@ -276,6 +276,18 @@ export class PokeAClient {
 		}
 		const requestUrl = this._options.pokeAByteUrl + "/mapper-service/change-mapper";
 		return await this._fetch(requestUrl, "PUT", mapperId);
+	}
+
+	/** 
+	 * Request PokeAByte to write an array of bytes into the game memory.
+	 * @param address The starting address from which to write the bytes.
+	 * @param bytes The bytes to write.
+	 * @returns A promise to await.
+	 */
+	writeMemory = async (address: number, bytes: number[]): Promise<void> => {
+		const requestUrl = this._options.pokeAByteUrl + "/driver/memory";
+		const body = JSON.stringify({ Address: address, Bytes: bytes })
+		await this._fetch(requestUrl, "PUT", body);
 	}
 }
 
