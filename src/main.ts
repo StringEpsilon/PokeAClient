@@ -277,6 +277,7 @@ export class PokeAClient {
 }
 
 export { ChangedField } from "./types/ClientOptions";
+export { GamePropertyType } from "./types/GamePropertyType";
 export type {
 	GameProperty,
 	PokeAByteMessages,
