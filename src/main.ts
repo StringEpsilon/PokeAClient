@@ -9,6 +9,7 @@ import { FetchMapperResponse } from "./types/FetchMapperResponse";
 import { AvailableMapper } from "./types/AvailableMapper";
 import { Glossary, GlossaryItem } from "./types/Glossary";
 import { fetchResult, fetchWithoutResult } from "./utils/fetchWrapper";
+import { FilesClient } from "./rest/filesClient";
 
 export class PokeAClient {
 	private _mapper: Mapper | null = null;
@@ -17,6 +18,7 @@ export class PokeAClient {
 	private _connection: HubConnection;
 	private _callbacks: PokeAClientCallbacks = {}
 	private _options: ClientOptions;
+	private _files: FilesClient;
 
 	/**
 	 * Creates an instance of PokeAClient.
@@ -31,7 +33,7 @@ export class PokeAClient {
 			reconnectDelayMs: options.reconnectDelayMs ?? 2000,
 			updateOn: options.updateOn ?? [ChangedField.bytes, ChangedField.value],
 		};
-
+		this._files = new FilesClient(this._options.pokeAByteUrl);
 		this._callbacks = callbacks;
 		this._connection = new HubConnectionBuilder()
 			.withUrl(this._options.pokeAByteUrl + "/updates")
@@ -68,6 +70,7 @@ export class PokeAClient {
 				}
 			});
 		this._connection.onclose(this._onClose);
+		
 	}
 
 	private _onClose = () => {
@@ -181,6 +184,11 @@ export class PokeAClient {
 	 */
 	isConnected = (): boolean => this._connection.state === HubConnectionState.Connected;
 
+	/** The REST client to talk to PokeABytes "file" APIs. */
+	get files() {
+		return this._files;
+	}
+
 	/** 
 	 * Request PokeAByte to freeze or unfreeze the value of a specific property.
 	 * @param path The path of the property to change.
@@ -264,6 +272,8 @@ export class PokeAClient {
 		const requestUrl = this._options.pokeAByteUrl + "/driver/memory";
 		await fetchWithoutResult(requestUrl, "PUT", { Address: address, Bytes: bytes });
 	}
+
+	
 }
 
 export { ChangedField } from "./types/ClientOptions";
@@ -279,3 +289,4 @@ export type {
 	Glossary,
 	GlossaryItem,
 };
+export * from "./rest/types/RestTypes";

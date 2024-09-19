@@ -2,6 +2,11 @@
 - `changeMapper`  now calls `/mapper-service/change-mapper` and no longer needs the driver parameter.
 - Added better typing for the glossary.
 - Added `writeMemory()`.
+- Added `PokeAClient.files` to talk to the PokeAByte files api.
+  - Implemented `FilesClient.getMapperFiles()`
+  - Implemented `FilesClient.checkForUpdates()`
+  - Implemented `FilesClient.getMapperUpdatesAsync()`
+  - Implemented `FilesClient.downloadMapperUpdatesAsync()`
 
 # 0.2.1 (2024-09-07)
 - Fixed missing "/" in get-mappers URI.
