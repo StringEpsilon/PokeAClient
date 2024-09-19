@@ -1,6 +1,11 @@
 import { fetchResult, fetchWithoutResult } from "../utils/fetchWrapper";
-import { MapperFile } from "./types/MapperFile";
-import { MapperUpdate, MapperUpdateRequest } from "./types/MapperUpdate";
+import { 
+	ArchivedMapper, 
+	ArchivedMappers,
+	MapperFile,
+	MapperUpdate, 
+	MapperUpdateRequest,
+} from "./types/RestTypes";
 
 export class FilesClient {
 	_baseUrl: string;
@@ -33,21 +38,37 @@ export class FilesClient {
 	downloadMapperUpdatesAsync = async (mappers: MapperUpdateRequest[]) => {
 		return await fetchWithoutResult(this._baseUrl + "/mapper/download_updates", "POST", mappers);
 	}
-
+	
+	/** Get a dictionary of archived mappers. */
 	getArchivedMappersAsync = async () => {
-		throw Error("Not implemented.");
+		return await fetchResult<ArchivedMappers>(this._baseUrl + "/mapper/get_archived");
+	}
+	
+	/** 
+	 * Tell PokeAByte to restore specified archived mappers 
+	 * @param mappers The mappers to restore.
+	 * @returns A boolean indicating request success or error.
+	 */
+	restoreMapper = async (mappers: ArchivedMapper[]) => {
+		return await fetchWithoutResult(this._baseUrl + "/mapper/restore_mappers", "POST", mappers);
 	}
 
-	restoreMapper = async () => {
-		throw Error("Not implemented.");
+	/**
+	 * Tell PokeAByte to delete specified archived mappers.
+	 * @param mappers The mappers to deleted.
+	 * @returns A boolean indicating request success or error.
+	 */
+	deleteMappers = async (mappers: ArchivedMapper[]) => {
+		return await fetchWithoutResult(this._baseUrl + "/mapper/delete_mappers", "POST", mappers);
 	}
 
-	deleteMappers = async () => {
-		throw Error("Not implemented.");
-	}
-
+	/**
+	 * Tell PokeAByte to re-read the archived mappers from file system.
+	 * @param mappers The mappers to deleted.
+	 * @returns The dictionary of archived mappers.
+	 */
 	refreshArchivedList = async () => {
-		throw Error("Not implemented.");
+		return await fetchResult<ArchivedMappers>(this._baseUrl + "/mapper/refresh_archived_list");
 	}
 
 	getGithubSettings = async () => {
