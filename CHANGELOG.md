@@ -1,4 +1,4 @@
-# 0.3.0 (future)
+# 0.3.0 (2024-09-20)
 - `changeMapper`  now calls `/mapper-service/change-mapper` and no longer needs the driver parameter.
 - Added better typing for the glossary.
 - Added `writeMemory()`.
