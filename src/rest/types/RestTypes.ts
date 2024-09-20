@@ -1,3 +1,4 @@
-export type { MapperFile } from "./MapperFile";
-export type { MapperUpdate, MapperVersion, MapperUpdateRequest} from "./MapperUpdate";
+export * from "./MapperFile";
+export * from "./MapperUpdate";
+export * from "./GithubSettings";
 export * from "./ArchivedMappers"

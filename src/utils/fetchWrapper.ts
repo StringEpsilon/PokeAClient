@@ -1,8 +1,14 @@
-export async function fetchWithoutResult(requestUrl: string, method: string, body: any = null) {
+export async function fetchWithoutResult(requestUrl: string, method: string = "GET", body: any = null) {
 	try {
 		var response = await fetch(
-			requestUrl, 
-			{ method, body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } }
+			method === "GET" 
+				? requestUrl + ((body && new URLSearchParams(body).toString() )|| "")
+				: requestUrl, 
+			{ 
+				method, 
+				body: method === "GET" ? null : JSON.stringify(body), 
+				headers: { 'Content-Type': 'application/json' } 
+			}
 		);
 		return response.ok;
 	} catch {
@@ -13,8 +19,14 @@ export async function fetchWithoutResult(requestUrl: string, method: string, bod
 export async function fetchResult<T>(requestUrl: string, method: string = "GET", body: any = null) {
 	try {
 		var response = await fetch(
-			requestUrl, 
-			{ method, body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } }
+			method === "GET" 
+				? requestUrl + ((body && new URLSearchParams(body).toString() )|| "")
+				: requestUrl, 
+			{ 
+				method, 
+				body: method === "GET" ? null : JSON.stringify(body), 
+				headers: { 'Content-Type': 'application/json' }
+			}
 		);
 		if (!response.ok) {
 			return null;

@@ -3,10 +3,7 @@
 - Added better typing for the glossary.
 - Added `writeMemory()`.
 - Added `PokeAClient.files` to talk to the PokeAByte files api.
-  - Implemented `FilesClient.getMapperFiles()`
-  - Implemented `FilesClient.checkForUpdates()`
-  - Implemented `FilesClient.getMapperUpdatesAsync()`
-  - Implemented `FilesClient.downloadMapperUpdatesAsync()`
+- Fixed missing type export for `GamePropertyType`.
 
 # 0.2.1 (2024-09-07)
 - Fixed missing "/" in get-mappers URI.

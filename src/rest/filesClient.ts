@@ -5,6 +5,7 @@ import {
 	MapperFile,
 	MapperUpdate, 
 	MapperUpdateRequest,
+	GithubSettings
 } from "./types/RestTypes";
 
 export class FilesClient {
@@ -69,29 +70,42 @@ export class FilesClient {
 	 */
 	refreshArchivedList = async () => {
 		return await fetchResult<ArchivedMappers>(this._baseUrl + "/mapper/refresh_archived_list");
+		
 	}
 
-	getGithubSettings = async () => {
-		throw Error("Not implemented.");
-	}
+	/**
+	 * Get the GitHub settings used to retrieve and update the mapper files.
+	 * 
+	 * @returns The GitHub settings.
+	 */
+	getGithubSettings = async () => await fetchResult<GithubSettings>(this._baseUrl + "/open_mapper_folder");
+	
+	/**
+	 * Update the GitHub settings used to retrieve and update the mapper files.
+	 * 
+	 * @param settings The new GitHub settings.
+	 * @returns A boolean indicating request success.
+	 */
+	saveGithubSettings = async (settings: GithubSettings) => 
+		await fetchWithoutResult(this._baseUrl + "/open_mapper_folder", "POST", settings );
 
-	saveGithubSettingsAsync = async () => {
-		throw Error("Not implemented.");
-	}
+	/** 
+	 * Let PokeAByte test the current GitHub configuration.
+	 * @returns A status message indicating whether the GitHub settings work.
+	 * Either "Successfully connected to Github Api!" or 
+	 * "Failed to connect to Github Api - Reason: {reason}"	 *
+	 */
+	testGithubSettingsAsync = async () => await fetchResult<string>(this._baseUrl + "/test_github_settings");
 
-	testGithubSettingsAsync = async () => {
-		throw Error("Not implemented.");
-	}
-
-	openMapperFolder = async () => {
-		throw Error("Not implemented.");
-	}
-
-	openMapperArchiveFolder = async () => {
-		throw Error("Not implemented.");
-	}
-
-	getGithubLink = async () => {
-		throw Error("Not implemented.");
-	}
+	/** Tell PokeAByte to open the local mapper folder in the default file browser.  */
+	openMapperFolder = async () => await fetchWithoutResult(this._baseUrl + "/open_mapper_folder");
+	
+	/** Tell PokeAByte to open the local mapper archive folder in the default file browser.  */
+	openMapperArchiveFolder = async () => await fetchWithoutResult(this._baseUrl + "/open_mapper_archive_folder");
+	
+	/** 
+	 * Retrieve the link to the mapper github repository. 	 * 
+	 * @returns The github repository URL.
+	*/
+	getGithubLink = async () => await fetchResult<string>(this._baseUrl + "/get_github_link");
 }
