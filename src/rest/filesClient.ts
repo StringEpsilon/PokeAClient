@@ -78,7 +78,12 @@ export class FilesClient {
 	 * 
 	 * @returns The GitHub settings.
 	 */
-	getGithubSettings = async () => await fetchResult<GithubSettings>(this._baseUrl + "/open_mapper_folder");
+	getGithubSettings = async () => {
+		const json = await fetchResult<string>(this._baseUrl + "/get_github_settings");
+		return  json !== null 
+			? JSON.parse(json) as GithubSettings
+			: null;
+	}
 	
 	/**
 	 * Update the GitHub settings used to retrieve and update the mapper files.
@@ -87,7 +92,7 @@ export class FilesClient {
 	 * @returns A boolean indicating request success.
 	 */
 	saveGithubSettings = async (settings: GithubSettings) => 
-		await fetchWithoutResult(this._baseUrl + "/open_mapper_folder", "POST", settings );
+		await fetchWithoutResult(this._baseUrl + "/save_github_settings", "POST", settings );
 
 	/** 
 	 * Let PokeAByte test the current GitHub configuration.
