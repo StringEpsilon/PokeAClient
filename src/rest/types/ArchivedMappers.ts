@@ -5,4 +5,4 @@ export type ArchivedMapper = {
 	fullPath: string,
 	mapper: MapperVersion
 }
-export type ArchivedMappers = Record<string, ArchivedMapper>
+export type ArchivedMappers = Record<string, ArchivedMapper[]>

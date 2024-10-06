@@ -1,3 +1,10 @@
+# 0.3.2 (2024-10-06)
+- Fixed wrong typing for `ArchivedMappers`
+- 
+# 0.3.2 (2024-09-23)
+- Fixed FilesClient.getGithubSettings fetching from wrong URL.
+- Fixed FilesClient.saveGithubSettings fetching from wrong URL.
+
 # 0.3.0 (2024-09-20)
 - `changeMapper`  now calls `/mapper-service/change-mapper` and no longer needs the driver parameter.
 - Added better typing for the glossary.
