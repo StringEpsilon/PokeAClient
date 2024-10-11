@@ -1,3 +1,5 @@
+import { GameProperty } from "./GameProperty";
+
 /**
  * Callbacks for all the events from the PokeAByte client.
  */
@@ -5,8 +7,9 @@ export interface PokeAClientCallbacks {
 	/**
 	 * Invoked whenever a game property changes. This callback is invoked before onPropertiesChanged.
 	 * @param path The path of the property.
+	 * @param previous The previous state of the property. This may be null if the property was newly added.
 	 */
-	onPropertyChange?: (path: string) => void;
+	onPropertyChange?: (path: string, previous: GameProperty|null) => void;
 	/**
 	 * Invoked whenever PokeAByte informs the client of property changes.
 	 * @param paths An array of paths of all the properties that have changed.

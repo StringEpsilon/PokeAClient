@@ -84,6 +84,7 @@ export class PokeAClient {
 
 	private _onPropertyChanged = (property: GameProperty) => {
 		if (this._options.updateOn.some(x => property.fieldsChanged.includes(x))) {
+			var previous = this._properties[property.path] ?? null;
 			this._properties[property.path] = {
 				...this._properties[property.path],
 				value: property.value,
@@ -92,7 +93,7 @@ export class PokeAClient {
 				isFrozen: property.isFrozen,
 			}
 			if (this._callbacks.onPropertyChange) {
-				this._callbacks.onPropertyChange(property.path);
+				this._callbacks.onPropertyChange(property.path, previous);
 			}
 		}
 	}

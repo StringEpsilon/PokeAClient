@@ -1,3 +1,18 @@
+# 0.4.0 (2024-10-11)
+- Added `previous` parameter to `PokeAClientCallbacks.onPropertyChange`, which contains the property state before the
+  update. 
+
+```ts
+const client = new PokeAClient({
+	onPropertyChange: (path: string, previous: GameProperty|null) => {
+		const property = client.getProperty(path);
+        if (property?.fieldsChanged.includes("value")) {
+          console.log(`${path} changed value from: ${previous?.value} to ${property.value}`);
+        }
+	}
+});
+```
+
 # 0.3.2 (2024-10-06)
 - Fixed wrong typing for `ArchivedMappers`
 - 
